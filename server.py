@@ -74,20 +74,19 @@ def flask_post_json():
 @app.route("/")
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    header = 'HTTP/1.1 301 Moved permanently\r\ncontent-type: text/html\r\nlocation: http://localhost:5000/static/index.html\r\n' 
-    return header
+    return flask.send_from_directory("static", "index.html")
 
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
     data = flask_post_json()
+    representation = myWorld.get(entity)
+    if (representation == None):
+        myWorld.set(entity, data)
     for key in data.keys():
-        representation = myWorld.get(entity)
         value = data[key]
-        if(representation == None):
-            myWorld.set(entity, data)
-        else:
-            myWorld.update(entity, key, value)
+        myWorld.update(entity, key, value)
+    representation = myWorld.get(entity)
     return representation
 
 @app.route("/world", methods=['POST','GET'])    
