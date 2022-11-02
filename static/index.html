@@ -40,6 +40,9 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
                 if (xhr.status==200) {
                     //XXX: parse some JSON from the request!
                     //XXX: Pass the data to the callback!
+                    const parsedJSON = JSON.parse(objects.responseText)
+                    callback(parsedJSON)
+                    return callback
                 }
             } 
             catch(e) {
