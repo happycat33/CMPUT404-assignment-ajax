@@ -50,7 +50,7 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     xhr.setRequestHeader("Content-type", "application/json")
     xhr.setRequestHeader('Access-Control-Allow-Origin', '*')
     xhr.setRequestHeader("Accept", "application/json")
-    xhr.send(objects)
+    xhr.send(JSON.stringify(objects))
 }
 
 
@@ -141,8 +141,7 @@ function addEntity(entity, data) {
     //XXX: Send a XHTML Request that updates the entity you just  modified!
     var host = window.location.host
     var port = window.location.port
-    sendJSONXMLHTTPRequest('http://localhost:5000/entity/' + entity, data, function(x){
-        console.log(x)
+    sendJSONXMLHTTPRequest('/entity/' + entity, data, (data) => {
     })
 }
 
@@ -274,6 +273,12 @@ function update() {
             try {
                 if (xhr.status == 200) {
                     console.log(xhr.responseText);
+                    let world = JSON.parse(xhr.responseText);
+                    for(let i = 0; i < world.length; i++){
+                        key = Object.keys(world)[i];
+                        value = Object.values(world)[i];
+                        addEntity(key,value);
+                    }
                 }
             }
             catch (e) {
@@ -281,12 +286,12 @@ function update() {
             }
         }
     };
-    xhr.open("GET", "http://localhost:5000/world");
+    xhr.open("GET", "/world");
     xhr.send();
 }
 
 // 30 frames per second
-setInterval( update, 1000/30.0);
+setInterval( update, 1000/10.0);
 
 
 

@@ -89,6 +89,7 @@ def update(entity):
         value = data[key]
         myWorld.update(entity, key, value)
     representation = myWorld.get(entity)
+    print(myWorld.world())
     return representation
 
 @app.route("/world", methods=['POST','GET'])    
@@ -96,6 +97,7 @@ def world():
     '''you should probably return the world here'''
 
     world = myWorld.world()
+    print(myWorld.world())
     return world
 
 @app.route("/entity/<entity>")    
