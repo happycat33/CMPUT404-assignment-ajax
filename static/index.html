@@ -273,12 +273,9 @@ function update() {
             try {
                 if (xhr.status == 200) {
                     console.log(xhr.responseText);
-                    let world = JSON.parse(xhr.responseText);
-                    for(let i = 0; i < world.length; i++){
-                        key = Object.keys(world)[i];
-                        value = Object.values(world)[i];
-                        addEntity(key,value);
-                    }
+                    world = JSON.parse(xhr.responseText);
+                    drawNextFrame();
+                    drawFrame();
                 }
             }
             catch (e) {
