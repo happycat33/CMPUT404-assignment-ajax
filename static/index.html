@@ -48,7 +48,6 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     };
     xhr.open('POST', url, true);
     xhr.setRequestHeader("Content-type", "application/json")
-    xhr.setRequestHeader('Access-Control-Allow-Origin', '*')
     xhr.setRequestHeader("Accept", "application/json")
     xhr.send(JSON.stringify(objects))
 }
@@ -138,9 +137,6 @@ function getPosition(e) {
 function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
-    //XXX: Send a XHTML Request that updates the entity you just  modified!
-    var host = window.location.host
-    var port = window.location.port
     sendJSONXMLHTTPRequest('/entity/' + entity, data, (data) => {
     })
 }
@@ -265,30 +261,15 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 
 function update() {
-    //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    drawFrame();
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            try {
-                if (xhr.status == 200) {
-                    console.log(xhr.responseText);
-                    world = JSON.parse(xhr.responseText);
-                    drawNextFrame();
-                    drawFrame();
-                }
-            }
-            catch (e) {
-                alert('Error: ' + e.name);
-            }
-        }
-    };
-    xhr.open("GET", "/world");
-    xhr.send();
+    drawFrame()
+    sendJSONXMLHTTPRequest('/world', null, (data) => {
+        world = data;
+    })
+    drawNextFrame();
 }
 
 // 30 frames per second
-setInterval( update, 1000/10.0);
+setInterval( update, 1000/30.0);
 
 
 
