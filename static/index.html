@@ -52,20 +52,49 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     xhr.send(JSON.stringify(objects))
 }
 
-
 world = {};
+var n = -1;
+var colour;
+
+function rainbowColor() {
+    if(n === 7){
+        n = -1;
+    }
+    n++;
+    console.log(n)
+    const rainbow = ['red', 'orange', 'yellow', 'blue', 'green', 'indigo', ' #8F00FF'] 
+    colour = rainbow[n]
+}
 
 //XXX: TODO Make this prettier!
 function drawCircle(context,entity) {
     with(context) {
-        beginPath();              
-        lineWidth = 5;
+        beginPath();     
+        if(entity["radius"] === 30){         
+            lineWidth = 5;
+        } else {
+            lineWidth = 3;
+        }
         var x = entity["x"];
         var y = entity["y"];
+        // Radii of the white glow.
+        innerRadius = 0,
+        outerRadius = 10,
+        // Radius of the entire circle.
+        radius = 8;
+
         //moveTo(x,y);
-        fillStyle = entity["colour"];
+        if(entity["colour"] !== 'random'){
+            fillStyle  = entity["colour"];
+        }
+        else{
+            var gradient = context.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, 'gold');
+            fillStyle = gradient;
+        }
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:10, 0, 5.0 * Math.PI, false);  
+        arc(x, y, (entity["radius"])?entity["radius"]:5, 0, 2.0 * Math.PI, false);  
         stroke();  
     }
 }
@@ -247,16 +276,15 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'#1F51FF'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'blue','radius': 30});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'#FF10F0'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'#FF10F0','radius': 30});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour': 'gold',
-                          'radius':10});
+    addEntityWithoutName({'x':x,'y':y, 'colour': 'random', 'radius':15});
 });
 
 
