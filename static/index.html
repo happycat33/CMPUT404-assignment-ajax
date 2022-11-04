@@ -31,7 +31,13 @@ var context = canvas.getContext("2d");
 var W = canvas.width  = window.innerWidth-6;
 var H = canvas.height = window.innerHeight-50;
 
-function sendJSONXMLHTTPRequest(url, objects, callback) {
+/** function creates a new XMLHttpRequest object and sets the onreadystatechange 
+  * (which will parse the JSON and call the callback function, provided by the 
+  * function call). If state is not ready, we then make a xhr request (setting headers)
+  * and sending th json version of the object body
+    **/
+
+ function sendJSONXMLHTTPRequest(url, objects, callback) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState==4) {
@@ -53,49 +59,38 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
 }
 
 world = {};
-var n = -1;
-var colour;
 
-function rainbowColor() {
-    if(n === 7){
-        n = -1;
-    }
-    n++;
-    console.log(n)
-    const rainbow = ['red', 'orange', 'yellow', 'blue', 'green', 'indigo', ' #8F00FF'] 
-    colour = rainbow[n]
-}
+/**
+ * Added code to create a gradient inside the circle (provided by https://stackoverflow.com/questions/16494262/how-to-draw-a-circle-with-centered-fadeing-out-gradients-with-html5-canvas)
+ * we then fill the entire circle as well (to make circle look better)
+ **/
 
-//XXX: TODO Make this prettier!
 function drawCircle(context,entity) {
     with(context) {
-        beginPath();     
-        if(entity["radius"] === 30){         
-            lineWidth = 5;
-        } else {
-            lineWidth = 3;
+        beginPath();    
+        if(entity['radius'] === 30){
+            lineWidth = 20;
+            innerRadius = 5;
+            outerRadius = 30;
+        } else {      
+            lineWidth = 10;
+            innerRadius = 1;
+            outerRadius = 13;
         }
         var x = entity["x"];
         var y = entity["y"];
-        // Radii of the white glow.
-        innerRadius = 0,
-        outerRadius = 10,
         // Radius of the entire circle.
-        radius = 8;
+        radius = entity["radius"];
 
         //moveTo(x,y);
-        if(entity["colour"] !== 'random'){
-            fillStyle  = entity["colour"];
-        }
-        else{
-            var gradient = context.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
-            gradient.addColorStop(0, 'white');
-            gradient.addColorStop(1, 'gold');
-            fillStyle = gradient;
-        }
+        var gradient = context.createRadialGradient(x, y, innerRadius, x, y, outerRadius);
+        gradient.addColorStop(0, 'white');
+        gradient.addColorStop(1, entity["colour"]);
+        fillStyle = gradient;
         strokeStyle = fillStyle;
         arc(x, y, (entity["radius"])?entity["radius"]:5, 0, 2.0 * Math.PI, false);  
         stroke();  
+        fill()
     }
 }
 
@@ -274,7 +269,11 @@ mouse = (function() {
 })();
 
 // Add the application specific mouse listeners!
-//XXX: TODO Make these prettier!
+/**
+ * here we add global variables and use them to determine which color (given by an array 
+ * inside update()) the smaller circles (created when dragging) become. 
+ * */
+
 mouse.mousedowners.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'blue','radius': 30});
 });
@@ -283,13 +282,27 @@ mouse.mouseuppers.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'#FF10F0','radius': 30});
 });
 
+colour = '';
+index = -1;
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y, 'colour': 'random', 'radius':15});
+    addEntityWithoutName({'x':x,'y':y, 'colour': colour, 'radius':10});
 });
 
+/**
+ * This function updates the canvas with the server information. we first draw the frame based on the current world state.
+ * We then set an array of colours (as explained above function) and use an index to rotate through them. We also set up 
+ * a new XML object (this time for GET requests) and when the state is ready, we get the returned object (the new current world)
+ * and draw the new state through drawNextFrame().
+ * */
 
 function update() {
     drawFrame()
+    colours = ["red", "orange", "yellow", "blue", "green", "#4B0082", "#8F00FF"]
+    if(index === 7){
+        index = -1;
+    }
+    index += 1;
+    colour = colours[index]
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
