@@ -262,10 +262,23 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     drawFrame()
-    sendJSONXMLHTTPRequest('/world', null, (data) => {
-        world = data;
-    })
-    drawNextFrame();
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            try {
+                if (xhr.status == 200) {
+                    console.log(xhr.responseText);
+                    world = JSON.parse(xhr.responseText);
+                    drawNextFrame();
+                }
+            }
+            catch (e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    xhr.open("GET", "/world");
+    xhr.send();
 }
 
 // 30 frames per second
